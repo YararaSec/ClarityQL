@@ -1,0 +1,532 @@
+// CodeQL database schema for Clarity
+// Automatically generated from the tree-sitter grammar; do not edit
+
+/*- Files and folders -*/
+
+/**
+ * The location of an element.
+ * The location spans column `startcolumn` of line `startline` to
+ * column `endcolumn` of line `endline` in file `file`.
+ * For more information, see
+ * [Locations](https://codeql.github.com/docs/writing-codeql-queries/providing-locations-in-codeql-queries/).
+ */
+locations_default(
+  unique int id: @location_default,
+  int file: @file ref,
+  int beginLine: int ref,
+  int beginColumn: int ref,
+  int endLine: int ref,
+  int endColumn: int ref
+);
+
+files(
+  unique int id: @file,
+  string name: string ref
+);
+
+folders(
+  unique int id: @folder,
+  string name: string ref
+);
+
+@container = @file | @folder
+
+containerparent(
+  int parent: @container ref,
+  unique int child: @container ref
+);
+
+/*- Empty location -*/
+
+empty_location(
+  int location: @location_default ref
+);
+
+/*- Source location prefix -*/
+
+/**
+ * The source location of the snapshot.
+ */
+sourceLocationPrefix(string prefix : string ref);
+
+/*- Diagnostic messages -*/
+
+diagnostics(
+  unique int id: @diagnostic,
+  int severity: int ref,
+  string error_tag: string ref,
+  string error_message: string ref,
+  string full_error_message: string ref,
+  int location: @location_default ref
+);
+
+/*- Diagnostic messages: severity -*/
+
+case @diagnostic.severity of
+  10 = @diagnostic_debug
+| 20 = @diagnostic_info
+| 30 = @diagnostic_warning
+| 40 = @diagnostic_error
+;
+
+/*- YAML -*/
+
+#keyset[parent, idx]
+yaml (unique int id: @yaml_node,
+      int kind: int ref,
+      int parent: @yaml_node_parent ref,
+      int idx: int ref,
+      string tag: string ref,
+      string tostring: string ref);
+
+case @yaml_node.kind of
+  0 = @yaml_scalar_node
+| 1 = @yaml_mapping_node
+| 2 = @yaml_sequence_node
+| 3 = @yaml_alias_node
+;
+
+@yaml_collection_node = @yaml_mapping_node | @yaml_sequence_node;
+
+@yaml_node_parent = @yaml_collection_node | @file;
+
+yaml_anchors (unique int node: @yaml_node ref,
+              string anchor: string ref);
+
+yaml_aliases (unique int alias: @yaml_alias_node ref,
+              string target: string ref);
+
+yaml_scalars (unique int scalar: @yaml_scalar_node ref,
+              int style: int ref,
+              string value: string ref);
+
+yaml_errors (unique int id: @yaml_error,
+             string message: string ref);
+
+yaml_locations(unique int locatable: @yaml_locatable ref,
+             int location: @location_default ref);
+
+@yaml_locatable = @yaml_node | @yaml_error;
+
+/*- Clarity dbscheme -*/
+@clarity_basic_native_form_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_basic_native_form, index]
+clarity_basic_native_form_child(
+  int clarity_basic_native_form: @clarity_basic_native_form ref,
+  int index: int ref,
+  unique int child: @clarity_basic_native_form_child_type ref
+);
+
+clarity_basic_native_form_def(
+  unique int id: @clarity_basic_native_form,
+  int operator: @clarity_token_native_identifier ref
+);
+
+@clarity_constant_definition_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_constant_definition, index]
+clarity_constant_definition_child(
+  int clarity_constant_definition: @clarity_constant_definition ref,
+  int index: int ref,
+  unique int child: @clarity_constant_definition_child_type ref
+);
+
+clarity_constant_definition_def(
+  unique int id: @clarity_constant_definition
+);
+
+@clarity_contract_function_call_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_contract_function_call, index]
+clarity_contract_function_call_child(
+  int clarity_contract_function_call: @clarity_contract_function_call ref,
+  int index: int ref,
+  unique int child: @clarity_contract_function_call_child_type ref
+);
+
+clarity_contract_function_call_def(
+  unique int id: @clarity_contract_function_call,
+  int operator: @clarity_token_identifier ref
+);
+
+@clarity_contract_principal_lit_child_type = @clarity_token_identifier | @clarity_token_standard_principal_lit
+
+#keyset[clarity_contract_principal_lit, index]
+clarity_contract_principal_lit_child(
+  int clarity_contract_principal_lit: @clarity_contract_principal_lit ref,
+  int index: int ref,
+  unique int child: @clarity_contract_principal_lit_child_type ref
+);
+
+clarity_contract_principal_lit_def(
+  unique int id: @clarity_contract_principal_lit
+);
+
+@clarity_function_definition_child_type = @clarity_private_function | @clarity_public_function | @clarity_read_only_function
+
+clarity_function_definition_def(
+  unique int id: @clarity_function_definition,
+  int child: @clarity_function_definition_child_type ref
+);
+
+@clarity_function_parameter_child_type = @clarity_parameter_type | @clarity_token_identifier
+
+#keyset[clarity_function_parameter, index]
+clarity_function_parameter_child(
+  int clarity_function_parameter: @clarity_function_parameter ref,
+  int index: int ref,
+  unique int child: @clarity_function_parameter_child_type ref
+);
+
+clarity_function_parameter_def(
+  unique int id: @clarity_function_parameter
+);
+
+@clarity_function_signature_child_type = @clarity_function_parameter | @clarity_token_identifier
+
+#keyset[clarity_function_signature, index]
+clarity_function_signature_child(
+  int clarity_function_signature: @clarity_function_signature ref,
+  int index: int ref,
+  unique int child: @clarity_function_signature_child_type ref
+);
+
+clarity_function_signature_def(
+  unique int id: @clarity_function_signature
+);
+
+@clarity_function_signature_for_trait_child_type = @clarity_native_type | @clarity_parameter_type | @clarity_token_identifier
+
+#keyset[clarity_function_signature_for_trait, index]
+clarity_function_signature_for_trait_child(
+  int clarity_function_signature_for_trait: @clarity_function_signature_for_trait ref,
+  int index: int ref,
+  unique int child: @clarity_function_signature_for_trait_child_type ref
+);
+
+clarity_function_signature_for_trait_def(
+  unique int id: @clarity_function_signature_for_trait
+);
+
+clarity_fungible_token_definition_def(
+  unique int id: @clarity_fungible_token_definition,
+  int child: @clarity_token_identifier ref
+);
+
+case @clarity_let_expression.operator of
+  0 = @clarity_let_expression_let
+;
+
+
+@clarity_let_expression_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_local_binding | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_let_expression, index]
+clarity_let_expression_child(
+  int clarity_let_expression: @clarity_let_expression ref,
+  int index: int ref,
+  unique int child: @clarity_let_expression_child_type ref
+);
+
+clarity_let_expression_def(
+  unique int id: @clarity_let_expression,
+  int operator: int ref
+);
+
+@clarity_list_lit_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_list_lit_token | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_list_lit, index]
+clarity_list_lit_child(
+  int clarity_list_lit: @clarity_list_lit ref,
+  int index: int ref,
+  unique int child: @clarity_list_lit_child_type ref
+);
+
+clarity_list_lit_def(
+  unique int id: @clarity_list_lit
+);
+
+clarity_list_type_def(
+  unique int id: @clarity_list_type,
+  int child: @clarity_parameter_type ref
+);
+
+@clarity_local_binding_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_local_binding, index]
+clarity_local_binding_child(
+  int clarity_local_binding: @clarity_local_binding ref,
+  int index: int ref,
+  unique int child: @clarity_local_binding_child_type ref
+);
+
+clarity_local_binding_def(
+  unique int id: @clarity_local_binding
+);
+
+@clarity_mapping_definition_key_type_type = @clarity_native_type | @clarity_tuple_type
+
+@clarity_mapping_definition_value_type_type = @clarity_native_type | @clarity_tuple_type
+
+clarity_mapping_definition_def(
+  unique int id: @clarity_mapping_definition,
+  int key_type: @clarity_mapping_definition_key_type_type ref,
+  int value_type: @clarity_mapping_definition_value_type_type ref,
+  int child: @clarity_token_identifier ref
+);
+
+@clarity_native_type_child_type = @clarity_list_type | @clarity_optional_type | @clarity_response_type | @clarity_token_ascii_string_type | @clarity_token_buffer_type | @clarity_token_utf8_string_type | @clarity_tuple_type | @clarity_tuple_type_for_trait
+
+clarity_native_type_child(
+  unique int clarity_native_type: @clarity_native_type ref,
+  unique int child: @clarity_native_type_child_type ref
+);
+
+clarity_native_type_def(
+  unique int id: @clarity_native_type
+);
+
+@clarity_non_fungible_token_definition_child_type = @clarity_native_type | @clarity_token_identifier
+
+#keyset[clarity_non_fungible_token_definition, index]
+clarity_non_fungible_token_definition_child(
+  int clarity_non_fungible_token_definition: @clarity_non_fungible_token_definition ref,
+  int index: int ref,
+  unique int child: @clarity_non_fungible_token_definition_child_type ref
+);
+
+clarity_non_fungible_token_definition_def(
+  unique int id: @clarity_non_fungible_token_definition
+);
+
+clarity_optional_type_def(
+  unique int id: @clarity_optional_type,
+  int child: @clarity_native_type ref
+);
+
+@clarity_parameter_type_child_type = @clarity_native_type | @clarity_trait_type
+
+clarity_parameter_type_def(
+  unique int id: @clarity_parameter_type,
+  int child: @clarity_parameter_type_child_type ref
+);
+
+@clarity_private_function_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_function_signature | @clarity_let_expression
+
+#keyset[clarity_private_function, index]
+clarity_private_function_child(
+  int clarity_private_function: @clarity_private_function ref,
+  int index: int ref,
+  unique int child: @clarity_private_function_child_type ref
+);
+
+clarity_private_function_def(
+  unique int id: @clarity_private_function
+);
+
+@clarity_public_function_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_function_signature | @clarity_let_expression
+
+#keyset[clarity_public_function, index]
+clarity_public_function_child(
+  int clarity_public_function: @clarity_public_function ref,
+  int index: int ref,
+  unique int child: @clarity_public_function_child_type ref
+);
+
+clarity_public_function_def(
+  unique int id: @clarity_public_function
+);
+
+@clarity_read_only_function_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_function_signature | @clarity_let_expression
+
+#keyset[clarity_read_only_function, index]
+clarity_read_only_function_child(
+  int clarity_read_only_function: @clarity_read_only_function ref,
+  int index: int ref,
+  unique int child: @clarity_read_only_function_child_type ref
+);
+
+clarity_read_only_function_def(
+  unique int id: @clarity_read_only_function
+);
+
+@clarity_response_lit_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+clarity_response_lit_def(
+  unique int id: @clarity_response_lit,
+  int child: @clarity_response_lit_child_type ref
+);
+
+clarity_response_type_def(
+  unique int id: @clarity_response_type,
+  int child: @clarity_native_type ref
+);
+
+@clarity_some_lit_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+clarity_some_lit_def(
+  unique int id: @clarity_some_lit,
+  int child: @clarity_some_lit_child_type ref
+);
+
+@clarity_source_child_type = @clarity_basic_native_form | @clarity_constant_definition | @clarity_contract_function_call | @clarity_function_definition | @clarity_let_expression | @clarity_mapping_definition | @clarity_token_definition | @clarity_trait_definition | @clarity_trait_implementation | @clarity_trait_usage | @clarity_variable_definition
+
+#keyset[clarity_source, index]
+clarity_source_child(
+  int clarity_source: @clarity_source ref,
+  int index: int ref,
+  unique int child: @clarity_source_child_type ref
+);
+
+clarity_source_def(
+  unique int id: @clarity_source
+);
+
+@clarity_token_definition_child_type = @clarity_fungible_token_definition | @clarity_non_fungible_token_definition
+
+clarity_token_definition_def(
+  unique int id: @clarity_token_definition,
+  int child: @clarity_token_definition_child_type ref
+);
+
+@clarity_trait_definition_child_type = @clarity_function_signature_for_trait | @clarity_token_identifier
+
+#keyset[clarity_trait_definition, index]
+clarity_trait_definition_child(
+  int clarity_trait_definition: @clarity_trait_definition ref,
+  int index: int ref,
+  unique int child: @clarity_trait_definition_child_type ref
+);
+
+clarity_trait_definition_def(
+  unique int id: @clarity_trait_definition
+);
+
+clarity_trait_implementation_def(
+  unique int id: @clarity_trait_implementation,
+  int trait_name: @clarity_token_identifier ref,
+  int child: @clarity_contract_principal_lit ref
+);
+
+clarity_trait_type_def(
+  unique int id: @clarity_trait_type,
+  int child: @clarity_token_identifier ref
+);
+
+clarity_trait_usage_def(
+  unique int id: @clarity_trait_usage,
+  int trait_alias: @clarity_token_identifier ref,
+  int trait_name: @clarity_token_identifier ref,
+  int child: @clarity_contract_principal_lit ref
+);
+
+#keyset[clarity_tuple_lit, index]
+clarity_tuple_lit_key(
+  int clarity_tuple_lit: @clarity_tuple_lit ref,
+  int index: int ref,
+  unique int key__: @clarity_token_identifier ref
+);
+
+@clarity_tuple_lit_value_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_tuple_lit, index]
+clarity_tuple_lit_value(
+  int clarity_tuple_lit: @clarity_tuple_lit ref,
+  int index: int ref,
+  unique int value: @clarity_tuple_lit_value_type ref
+);
+
+clarity_tuple_lit_def(
+  unique int id: @clarity_tuple_lit
+);
+
+#keyset[clarity_tuple_type, index]
+clarity_tuple_type_key(
+  int clarity_tuple_type: @clarity_tuple_type ref,
+  int index: int ref,
+  unique int key__: @clarity_token_identifier ref
+);
+
+#keyset[clarity_tuple_type, index]
+clarity_tuple_type_value_type(
+  int clarity_tuple_type: @clarity_tuple_type ref,
+  int index: int ref,
+  unique int value_type: @clarity_native_type ref
+);
+
+clarity_tuple_type_def(
+  unique int id: @clarity_tuple_type
+);
+
+#keyset[clarity_tuple_type_for_trait, index]
+clarity_tuple_type_for_trait_key(
+  int clarity_tuple_type_for_trait: @clarity_tuple_type_for_trait ref,
+  int index: int ref,
+  unique int key__: @clarity_token_identifier ref
+);
+
+#keyset[clarity_tuple_type_for_trait, index]
+clarity_tuple_type_for_trait_value_type(
+  int clarity_tuple_type_for_trait: @clarity_tuple_type_for_trait ref,
+  int index: int ref,
+  unique int value_type: @clarity_native_type ref
+);
+
+clarity_tuple_type_for_trait_def(
+  unique int id: @clarity_tuple_type_for_trait
+);
+
+@clarity_variable_definition_child_type = @clarity_basic_native_form | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_let_expression | @clarity_list_lit | @clarity_native_type | @clarity_response_lit | @clarity_some_lit | @clarity_token_ascii_string_lit | @clarity_token_bool_lit | @clarity_token_buffer_lit | @clarity_token_global | @clarity_token_identifier | @clarity_token_int_lit | @clarity_token_none_lit | @clarity_token_standard_principal_lit | @clarity_token_uint_lit | @clarity_token_utf8_string_lit | @clarity_tuple_lit
+
+#keyset[clarity_variable_definition, index]
+clarity_variable_definition_child(
+  int clarity_variable_definition: @clarity_variable_definition ref,
+  int index: int ref,
+  unique int child: @clarity_variable_definition_child_type ref
+);
+
+clarity_variable_definition_def(
+  unique int id: @clarity_variable_definition
+);
+
+clarity_tokeninfo(
+  unique int id: @clarity_token,
+  int kind: int ref,
+  string value: string ref
+);
+
+case @clarity_token.kind of
+  0 = @clarity_reserved_word
+| 1 = @clarity_token_ascii_string_lit
+| 2 = @clarity_token_ascii_string_type
+| 3 = @clarity_token_bool_lit
+| 4 = @clarity_token_buffer_lit
+| 5 = @clarity_token_buffer_type
+| 6 = @clarity_token_comment
+| 7 = @clarity_token_global
+| 8 = @clarity_token_identifier
+| 9 = @clarity_token_int_lit
+| 10 = @clarity_token_list_lit_token
+| 11 = @clarity_token_native_identifier
+| 12 = @clarity_token_none_lit
+| 13 = @clarity_token_standard_principal_lit
+| 14 = @clarity_token_uint_lit
+| 15 = @clarity_token_utf8_string_lit
+| 16 = @clarity_token_utf8_string_type
+;
+
+
+@clarity_ast_node = @clarity_basic_native_form | @clarity_constant_definition | @clarity_contract_function_call | @clarity_contract_principal_lit | @clarity_function_definition | @clarity_function_parameter | @clarity_function_signature | @clarity_function_signature_for_trait | @clarity_fungible_token_definition | @clarity_let_expression | @clarity_list_lit | @clarity_list_type | @clarity_local_binding | @clarity_mapping_definition | @clarity_native_type | @clarity_non_fungible_token_definition | @clarity_optional_type | @clarity_parameter_type | @clarity_private_function | @clarity_public_function | @clarity_read_only_function | @clarity_response_lit | @clarity_response_type | @clarity_some_lit | @clarity_source | @clarity_token | @clarity_token_definition | @clarity_trait_definition | @clarity_trait_implementation | @clarity_trait_type | @clarity_trait_usage | @clarity_tuple_lit | @clarity_tuple_type | @clarity_tuple_type_for_trait | @clarity_variable_definition
+
+clarity_ast_node_location(
+  unique int node: @clarity_ast_node ref,
+  int loc: @location_default ref
+);
+
+#keyset[parent, parent_index]
+clarity_ast_node_parent(
+  unique int node: @clarity_ast_node ref,
+  int parent: @clarity_ast_node ref,
+  int parent_index: int ref
+);
+

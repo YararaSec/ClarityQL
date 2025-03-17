@@ -4,5 +4,7 @@ private import codeql.divideBeforeMultiply
 private import codeql.privateFunctionNotUsed
 private import codeql.txSenderInAssert
 private import codeql.unusedArguments
+private import codeql.unusedLetVariables
 private import codeql.unwrapPanicUsage
 private import codeql.updatedFunctions
+private import codeql.varCouldBeConstant
